@@ -2,11 +2,6 @@ pipeline {
 
     agent any
 
-    tools {
-        maven 'Maven3'
-        jdk 'JDK21'
-    }
-
     environment {
         APP_NAME = "employee-webapp"
     }
@@ -14,7 +9,7 @@ pipeline {
     parameters {
         choice(
             name: 'ENVIRONMENT',
-            choices: ['DEV', 'QA', 'PROD'],
+            choices: ['DEV','QA','PROD'],
             description: 'Select Environment'
         )
     }
@@ -39,11 +34,9 @@ pipeline {
                 echo "Deploying ${APP_NAME} to ${params.ENVIRONMENT}"
             }
         }
-
     }
 
     post {
-
         success {
             echo "Build Successful"
         }
@@ -55,6 +48,5 @@ pipeline {
         always {
             echo "Pipeline Finished"
         }
-
     }
 }
