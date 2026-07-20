@@ -10,7 +10,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo "Source code downloaded from GitHub."
+                checkout scm
             }
         }
 
@@ -30,17 +30,18 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "Deploying application..."
+                echo "Deploying Application"
             }
         }
     }
 
     post {
         success {
-            echo "Build Successful"
+            echo 'Build Successful'
         }
+
         failure {
-            echo "Build Failed"
+            echo 'Build Failed'
         }
     }
 }
