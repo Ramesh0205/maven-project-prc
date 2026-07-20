@@ -6,14 +6,6 @@ pipeline {
         APP_NAME = "employee-webapp"
     }
 
-    parameters {
-        choice(
-            name: 'ENVIRONMENT',
-            choices: ['DEV','QA','PROD'],
-            description: 'Select Environment'
-        )
-    }
-
     stages {
 
         stage('Checkout') {
@@ -24,7 +16,6 @@ pipeline {
 
         stage('Build') {
             steps {
-                echo "Building ${APP_NAME}"
                 sh 'mvn clean package'
             }
         }
@@ -39,7 +30,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "Deploying ${APP_NAME} to ${params.ENVIRONMENT}"
+                echo "Deploying application..."
             }
         }
     }
@@ -48,13 +39,8 @@ pipeline {
         success {
             echo "Build Successful"
         }
-
         failure {
             echo "Build Failed"
-        }
-
-        always {
-            echo "Pipeline Finished"
         }
     }
 }
