@@ -29,6 +29,14 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('Sonarqube') {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=employee-webapp'
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 echo "Deploying ${APP_NAME} to ${params.ENVIRONMENT}"
