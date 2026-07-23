@@ -46,7 +46,7 @@ pipeline {
                                 sshTransfer(
                                     sourceFiles: 'target/*.war',
                                     removePrefix: 'target',
-                                    remoteDirectory: '/opt/tomcat/webapps'
+                                    remoteDirectory: ''
                                 )
                             ]
                         )
