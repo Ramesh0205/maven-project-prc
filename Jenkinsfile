@@ -38,7 +38,20 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo "Deploying Application"
+                sshPublisher(
+                    publishers: [
+                        sshPublisherDesc(
+                            configName: 'tomcat-server',
+                            transfers: [
+                                sshTransfer(
+                                    sourceFiles: 'target/*.war',
+                                    removePrefix: 'target',
+                                    remoteDirectory: '/opt/tomcat/webapps'
+                                )
+                            ]
+                        )
+                    ]
+                )
             }
         }
     }
