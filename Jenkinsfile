@@ -47,10 +47,8 @@ pipeline {
                                     sourceFiles: 'target/employee-webapp.war',
                                     removePrefix: 'target',
                                     remoteDirectory: '/opt/tomcat/webapps',
-                                    verbose: true
                                )
-                            ],
-                            verbose: true
+                            ]
                         )
                     ]
                 )
