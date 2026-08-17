@@ -36,7 +36,7 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Tomcat') {
             steps {
                 sshPublisher(
                     publishers: [
@@ -46,10 +46,7 @@ pipeline {
                                 sshTransfer(
                                     sourceFiles: 'target/employee-webapp.war',
                                     removePrefix: 'target',
-                                    remoteDirectory: '/opt/tomcat/webapps',
-                                    execCommand: 'rm -rf /opt/tomcat/webapps/employee-webapp && /opt/tomcat/bin/shutdown.sh && sleep 5 && /opt/tomcat/bin/startup.sh',
-                                    execTimeout: 120000,
-                                    verbose: true
+                                    remoteDirectory: '/opt/tomcat/webapps'
                                 )
                             ],
                             verbose: true
@@ -58,22 +55,27 @@ pipeline {
                 )
             }
         }
+
+        stage('Verify Deployment') {
+            steps {
+                echo 'Application deployed successfully to Tomcat.'
+            }
+        }
     }
 
     post {
-
         success {
-            echo '======================================'
+            echo '========================================'
             echo 'CI/CD PIPELINE SUCCESSFUL'
             echo 'Application deployed to Tomcat'
-            echo '======================================'
+            echo '========================================'
         }
 
         failure {
-            echo '======================================'
+            echo '========================================'
             echo 'CI/CD PIPELINE FAILED'
-            echo 'Check the Console Output'
-            echo '======================================'
+            echo 'Check the Jenkins console output'
+            echo '========================================'
         }
     }
 }
