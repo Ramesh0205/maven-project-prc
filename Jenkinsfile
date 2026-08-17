@@ -47,11 +47,12 @@ pipeline {
                                     sourceFiles: 'target/employee-webapp.war',
                                     removePrefix: 'target',
                                     remoteDirectory: '/opt/tomcat/webapps',
-                                    execCommand: '/opt/tomcat/bin/shutdown.sh && sleep 5 && /opt/tomcat/bin/startup.sh',
+                                    execCommand: 'rm -rf /opt/tomcat/webapps/employee-webapp && /opt/tomcat/bin/shutdown.sh && sleep 5 && /opt/tomcat/bin/startup.sh',
                                     execTimeout: 120000,
                                     verbose: true
                                 )
-                            ]
+                            ],
+                            verbose: true
                         )
                     ]
                 )
@@ -60,12 +61,19 @@ pipeline {
     }
 
     post {
+
         success {
-            echo 'CI/CD Pipeline completed successfully!'
+            echo '======================================'
+            echo 'CI/CD PIPELINE SUCCESSFUL'
+            echo 'Application deployed to Tomcat'
+            echo '======================================'
         }
 
         failure {
-            echo 'CI/CD Pipeline failed!'
+            echo '======================================'
+            echo 'CI/CD PIPELINE FAILED'
+            echo 'Check the Console Output'
+            echo '======================================'
         }
     }
 }
