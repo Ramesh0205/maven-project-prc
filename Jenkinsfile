@@ -44,9 +44,12 @@ pipeline {
                             configName: 'tomcat-server',
                             transfers: [
                                 sshTransfer(
-                                    sourceFiles: 'target/*.war',
+                                    sourceFiles: 'target/employee-webapp.war',
                                     removePrefix: 'target',
-                                    remoteDirectory: ''
+                                    remoteDirectory: '/opt/tomcat/webapps',
+                                    execCommand: '/opt/tomcat/bin/shutdown.sh && sleep 5 && /opt/tomcat/bin/startup.sh',
+                                    execTimeout: 120000,
+                                    verbose: true
                                 )
                             ]
                         )
@@ -58,11 +61,11 @@ pipeline {
 
     post {
         success {
-            echo 'Build Successful'
+            echo 'CI/CD Pipeline completed successfully!'
         }
 
         failure {
-            echo 'Build Failed'
+            echo 'CI/CD Pipeline failed!'
         }
     }
 }
