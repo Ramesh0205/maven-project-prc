@@ -16,7 +16,14 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                configFileProvider([
+                    configFile(
+                        fileId: 'maven-settings',
+                        variable: 'MAVEN_SETTINGS'
+                    )
+                ]) {
+                    sh 'mvn -s "$MAVEN_SETTINGS" clean package'
+                }
             }
         }
 
@@ -32,6 +39,19 @@ pipeline {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Publish to Nexus') {
+            steps {
+                configFileProvider([
+                    configFile(
+                        fileId: 'maven-settings',
+                        variable: 'MAVEN_SETTINGS'
+                    )
+                ]) {
+                    sh 'mvn -s "$MAVEN_SETTINGS" deploy -DskipTests'
                 }
             }
         }
