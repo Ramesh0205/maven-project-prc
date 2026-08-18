@@ -46,8 +46,9 @@ pipeline {
                                 sshTransfer(
                                     sourceFiles: 'target/employee-webapp.war',
                                     removePrefix: 'target',
-                                    remoteDirectory: '/opt/tomcat/webapps',
-                               )
+                                    remoteDirectory: '.',
+                                    execCommand: 'sudo cp /home/azureuser/employee-webapp.war /opt/tomcat/webapps/employee-webapp.war'
+                                )
                             ]
                         )
                     ]
