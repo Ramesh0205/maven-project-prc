@@ -56,6 +56,31 @@ pipeline {
             }
         }
 
+        stage('Download Artifact from Nexus') {
+            steps {
+                configFileProvider([
+                    configFile(
+                        fileId: 'maven-settings',
+                        variable: 'MAVEN_SETTINGS'
+                    )
+                ]) {
+                    sh '''
+                        rm -rf nexus-download
+                        mkdir -p nexus-download
+
+                        mvn -s "$MAVEN_SETTINGS" dependency:get \
+                        -Dartifact=com.ramesh.employee:employee-webapp:1.0-SNAPSHOT:war \
+                        -DremoteRepositories=nexus-snapshots::default::http://20.121.14.173:8081/repository/maven-snapshots/ \
+                        -Dtransitive=false
+
+                        cp ~/.m2/repository/com/ramesh/employee/employee-webapp/1.0-SNAPSHOT/employee-webapp-1.0-SNAPSHOT.war nexus-download/employee-webapp.war
+
+                        ls -lh nexus-download/employee-webapp.war
+                    '''
+                }
+            }
+        }
+
         stage('Deploy to Tomcat') {
             steps {
                 sshPublisher(
@@ -64,8 +89,8 @@ pipeline {
                             configName: 'tomcat-server',
                             transfers: [
                                 sshTransfer(
-                                    sourceFiles: 'target/employee-webapp.war',
-                                    removePrefix: 'target',
+                                    sourceFiles: 'nexus-download/employee-webapp.war',
+                                    removePrefix: 'nexus-download',
                                     remoteDirectory: '.',
                                     execCommand: 'sudo cp /home/azureuser/employee-webapp.war /opt/tomcat/webapps/employee-webapp.war'
                                 )
@@ -78,16 +103,18 @@ pipeline {
 
         stage('Verify Deployment') {
             steps {
-                echo 'Application deployed successfully to Tomcat.'
+                echo 'Application deployed successfully to Tomcat from Nexus artifact.'
             }
         }
     }
 
     post {
+
         success {
             echo '========================================'
             echo 'CI/CD PIPELINE SUCCESSFUL'
-            echo 'Application deployed to Tomcat'
+            echo 'Application built, analyzed,'
+            echo 'published to Nexus and deployed to Tomcat'
             echo '========================================'
         }
 
