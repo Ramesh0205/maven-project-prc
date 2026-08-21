@@ -146,6 +146,34 @@ pipeline {
                 '''
             }
         }
+
+        stage('Docker Deploy') {
+            steps {
+                sh '''
+                    docker pull ${DOCKER_IMAGE}:${BUILD_NUMBER}
+
+                    docker stop employee-webapp || true
+                    docker rm employee-webapp || true
+
+                    docker run -d \
+                        --name employee-webapp \
+                        -p 8083:8080 \
+                        ${DOCKER_IMAGE}:${BUILD_NUMBER}
+
+                    docker ps
+                '''
+            }
+        }
+
+        stage('Verify Docker Deployment') {
+            steps {
+                sh '''
+                    sleep 10
+                    docker ps
+                    curl -f http://localhost:8083/employee-webapp/
+                '''
+            }
+        }
     }
 
     post {
@@ -157,6 +185,7 @@ pipeline {
             echo 'WAR published to Nexus'
             echo 'Application deployed to Tomcat'
             echo 'Docker image built and pushed to Nexus'
+            echo 'Docker image deployed successfully'
             echo '========================================'
         }
 
