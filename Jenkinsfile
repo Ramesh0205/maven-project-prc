@@ -4,6 +4,8 @@ pipeline {
 
     environment {
         APP_NAME = "employee-webapp"
+        DOCKER_REGISTRY = "20.121.14.173:8082"
+        DOCKER_IMAGE = "${DOCKER_REGISTRY}/${APP_NAME}"
     }
 
     stages {
@@ -106,6 +108,44 @@ pipeline {
                 echo 'Application deployed successfully to Tomcat from Nexus artifact.'
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    docker build \
+                    -t ${DOCKER_IMAGE}:${BUILD_NUMBER} \
+                    -t ${DOCKER_IMAGE}:latest \
+                    .
+                '''
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'nexus-docker-credentials',
+                        usernameVariable: 'NEXUS_USERNAME',
+                        passwordVariable: 'NEXUS_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        echo "$NEXUS_PASSWORD" | docker login ${DOCKER_REGISTRY} \
+                        -u "$NEXUS_USERNAME" \
+                        --password-stdin
+                    '''
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh '''
+                    docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                    docker push ${DOCKER_IMAGE}:latest
+                '''
+            }
+        }
     }
 
     post {
@@ -113,8 +153,10 @@ pipeline {
         success {
             echo '========================================'
             echo 'CI/CD PIPELINE SUCCESSFUL'
-            echo 'Application built, analyzed,'
-            echo 'published to Nexus and deployed to Tomcat'
+            echo 'Application built and analyzed'
+            echo 'WAR published to Nexus'
+            echo 'Application deployed to Tomcat'
+            echo 'Docker image built and pushed to Nexus'
             echo '========================================'
         }
 
