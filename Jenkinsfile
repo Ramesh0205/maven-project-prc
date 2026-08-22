@@ -75,37 +75,12 @@ pipeline {
                         -DremoteRepositories=nexus-snapshots::default::http://20.121.14.173:8081/repository/maven-snapshots/ \
                         -Dtransitive=false
 
-                        cp ~/.m2/repository/com/ramesh/employee/employee-webapp/1.0-SNAPSHOT/employee-webapp-1.0-SNAPSHOT.war nexus-download/employee-webapp.war
+                        cp ~/.m2/repository/com/ramesh/employee/employee-webapp/1.0-SNAPSHOT/employee-webapp-1.0-SNAPSHOT.war \
+                        nexus-download/employee-webapp.war
 
                         ls -lh nexus-download/employee-webapp.war
                     '''
                 }
-            }
-        }
-
-        stage('Deploy to Tomcat') {
-            steps {
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: 'tomcat-server',
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: 'nexus-download/employee-webapp.war',
-                                    removePrefix: 'nexus-download',
-                                    remoteDirectory: '.',
-                                    execCommand: 'sudo cp /home/azureuser/employee-webapp.war /opt/tomcat/webapps/employee-webapp.war'
-                                )
-                            ]
-                        )
-                    ]
-                )
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                echo 'Application deployed successfully to Tomcat from Nexus artifact.'
             }
         }
 
@@ -169,7 +144,9 @@ pipeline {
             steps {
                 sh '''
                     sleep 10
+
                     docker ps
+
                     curl -f http://localhost:8083/employee-webapp/
                 '''
             }
@@ -181,11 +158,15 @@ pipeline {
         success {
             echo '========================================'
             echo 'CI/CD PIPELINE SUCCESSFUL'
-            echo 'Application built and analyzed'
+            echo 'Application built successfully'
+            echo 'SonarQube analysis completed'
+            echo 'Quality Gate passed'
             echo 'WAR published to Nexus'
-            echo 'Application deployed to Tomcat'
-            echo 'Docker image built and pushed to Nexus'
-            echo 'Docker image deployed successfully'
+            echo 'WAR downloaded from Nexus'
+            echo 'Docker image built successfully'
+            echo 'Docker image pushed to Nexus'
+            echo 'Docker container deployed successfully'
+            echo 'Application verification successful'
             echo '========================================'
         }
 
